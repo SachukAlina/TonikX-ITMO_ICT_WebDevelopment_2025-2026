@@ -9,11 +9,19 @@ const breeds = ref([]);
 const isLoading = ref(false);
 const isError = ref(false);
 const isAddModalVisible = ref(false);
+const cells = ref([]);
+const diets = ref([])
+
+async function fetchDiets() {
+  await axios.get("manufactory/diets/").then(r => {
+    diets.value = r.data
+  })
+}
 
 async function fetchChickens() {
   isLoading.value = true;
   await axios
-      .get('manufactory/chicken')
+      .get('manufactory/chicken/')
       .then(response => {
         chickens.value = response.data;
       })
@@ -29,7 +37,7 @@ async function fetchChickens() {
 async function fetchBreeds() {
   isLoading.value = true;
   await axios
-      .get('manufactory/breeds')
+      .get('manufactory/breeds/')
       .then(response => {
         breeds.value = response.data;
       })
@@ -43,10 +51,13 @@ async function fetchBreeds() {
 }
 
 async function addChicken(chicken) {
-  await axios.post(`manufactory/chicken/`, chicken).then(fetchChickens).catch(error => {
-    isError.value = true;
-    console.error(`Ошибка добавления курицы: ${error}`);
-  })
+  const payload = normalizeChickenPayload(chicken)
+  await axios.post(`manufactory/chicken/`, payload)
+    .then(fetchChickens)
+    .catch(error => {
+      console.log("POST ERR:", error.response?.data)
+      isError.value = true
+    })
 }
 
 async function deleteChicken(id) {
@@ -59,14 +70,50 @@ async function deleteChicken(id) {
 }
 
 async function updateChicken(chicken) {
-  await axios.put(`manufactory/chicken/${chicken.id}/`, chicken).then(fetchChickens).catch(error => {
-    isError.value = true;
-    console.error(`Ошибка обновления курицы: ${error}`);
-  })
+  const payload = normalizeChickenPayload(chicken)
+  await axios.patch(`manufactory/chicken/${chicken.id}/`, payload)
+    .then(fetchChickens)
+    .catch(error => {
+      console.log("PATCH ERR:", error.response?.data)
+      isError.value = true
+    })
+}
+
+async function fetchCells() {
+  isLoading.value = true;
+  await axios
+    .get('manufactory/cells/')
+    .then(response => {
+      cells.value = response.data;
+    })
+    .catch(error => {
+      console.error("Ошибка загрузки клеток", error);
+      isError.value = true;
+    })
+    .finally(() => {
+      isLoading.value = false;
+    });
+}
+
+function toId(v) {
+  return v && typeof v === "object" ? v.id : v
+}
+
+function normalizeChickenPayload(ch) {
+  return {
+    weight: Number(ch.weight),
+    age: Number(ch.age),
+    egg_performance_month: Number(ch.egg_performance_month),
+
+    breed: toId(ch.breed),
+    cell: toId(ch.cell),
+
+    diet: toId(ch.diet),
+  }
 }
 
 onMounted(async () => {
-  await Promise.all([fetchChickens(), fetchBreeds()])
+  await Promise.all([fetchChickens(), fetchBreeds(), fetchCells()])
 });
 
 </script>
@@ -84,12 +131,13 @@ onMounted(async () => {
       <h2>Список куриц</h2>
       <v-btn color="primary" @click="isAddModalVisible = true">Добавить курицу</v-btn>
       <ChickenList :chickens="chickens" :breeds="breeds" @delete-chicken="deleteChicken" @update-chicken="updateChicken"/>
-      <ChickenModal
-          v-model="isAddModalVisible"
-          mode="add"
-          :breeds="breeds"
-          @submit-chicken="addChicken"
-      />
+    <ChickenModal
+      v-model="isAddModalVisible"
+      mode="add"
+      :breeds="breeds"
+      :cells="cells"
+      @submit-chicken="addChicken"
+    />
     </template>
   </div>
 </template>
