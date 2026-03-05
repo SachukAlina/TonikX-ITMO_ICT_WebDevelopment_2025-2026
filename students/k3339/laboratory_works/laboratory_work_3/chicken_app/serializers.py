@@ -28,7 +28,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Employee
-        fields = ['passport', 'first_name', 'second_name', 'patronymic', 'responsible_cells']
+        fields = ['id', 'passport', 'first_name', 'second_name', 'patronymic', 'responsible_cells']
 
     def get_responsible_cells(self, obj):
         responsible_cells = ResponsibleEmployee.objects.filter(employee=obj).values_list('cell', flat=True)

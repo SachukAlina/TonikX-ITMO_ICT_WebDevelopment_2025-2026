@@ -4,13 +4,13 @@ from chicken_app.views import EmployeeAPIView, EmployeeDetailsAPIView, Responsib
     DietDetailsAPIView, BreedAPIView, BreedDetailsAPIView, ChickenAPIView, ChickenDetailsAPIView, LaborContractsAPIView, \
     LaborContractDetailsAPIView, CellAPIView, WorkshopWithMostBreedAPIView, EggPerformanceByWeightBreedAgeAPIView, \
     AverageEggsPerEmployeeAPIView, ChickenCountByBreedWorkshopAPIView, BreedPerformanceDifferenceAPIView, \
-    MonthlyReportAPIView
+    MonthlyReportAPIView, ResponsibleEmployeeDetailsAPIView
 
 urlpatterns = [
     path('employees/', EmployeeAPIView.as_view()),
     path('employees/<int:pk>/', EmployeeDetailsAPIView.as_view()),
     path('employees/cells', ResponsibleEmployeeAPIView.as_view()),
-    path('employees/cells/<int:pk>', ResponsibleEmployeeAPIView.as_view()),
+    path('employees/cells/<int:pk>', ResponsibleEmployeeDetailsAPIView.as_view()),
     path('diets/', DietAPIView.as_view()),
     path('diets/<int:pk>', DietDetailsAPIView.as_view()),
     path('breeds/', BreedAPIView.as_view()),
